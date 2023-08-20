@@ -18,8 +18,6 @@ public class APICaller {
 
         location_api_caller(user_city);
 
-        
-        
         scanner.close();
     }
     
@@ -60,7 +58,7 @@ public class APICaller {
 
             System.out.print("Enter the index you wanna choose: ");
             int user_choice = scanner.nextInt();
-            temp_api_caller(jsonArray, user_choice, user_city);
+            temp_api_caller(jsonArray, user_choice, user_city); // this is kinda dumb, but will do for now
 
         } else {
             System.out.print("Error fetching data for locations.");
