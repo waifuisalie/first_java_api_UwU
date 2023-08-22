@@ -16,7 +16,12 @@ public class APICaller {
         System.out.print("What city do you want to check? ");
         String user_city = scanner.nextLine();
 
-        location_api_caller(user_city);
+        location_api_parser(user_city);
+
+        System.out.print("Enter the index you wanna choose: ");
+        int user_choice = scanner.nextInt();
+
+        temp_api_parser(user_choice, user_city);
 
         scanner.close();
     }
@@ -35,13 +40,15 @@ public class APICaller {
         }
     }
 
-    private static void location_api_caller(String user_city) {
-        Scanner scanner = new Scanner(System.in);
+    private static String location_api_url(String user_city) {
         String apiKey = System.getenv("MY_API_KEY");
-
         String apiUrlFormat = "http://dataservice.accuweather.com/locations/v1/cities/search?apikey=%s&q=%s";
-        String apiUrl = String.format(apiUrlFormat, apiKey, user_city);
-        
+        String locationApiUrl = String.format(apiUrlFormat, apiKey, user_city);
+        return locationApiUrl;
+    }
+
+    private static void location_api_parser(String user_city) {
+        String apiUrl = location_api_url(user_city);
         JSONArray jsonArray = generateJsonArrayForApiCall(apiUrl);
 
         if (jsonArray != null) {
@@ -55,46 +62,52 @@ public class APICaller {
                 
                 System.out.println("(" + i + ") " + user_city + ", " + state_name + " from " + country_name);
             }
-
-            System.out.print("Enter the index you wanna choose: ");
-            int user_choice = scanner.nextInt();
-            temp_api_caller(jsonArray, user_choice, user_city); // this is kinda dumb, but will do for now
-
         } else {
             System.out.print("Error fetching data for locations.");
-        }
-        scanner.close();
-        
+        }        
     }
-    
-    private static void temp_api_caller(JSONArray jsonArray, int user_choice, String user_city) {
-        String apiKey = System.getenv("MY_API_KEY");
 
+    private static String key_api_url(int user_choice) {
+        String apiKey = System.getenv("MY_API_KEY");
+        String apiUrlFormatTemp = "http://dataservice.accuweather.com/currentconditions/v1/%s?apikey=%s";
+        String chosenKey = chosen_key_getter(user_choice, apiUrlFormatTemp);
+        String apiUrlTemp = String.format(apiUrlFormatTemp, chosenKey, apiKey);
+        return apiUrlTemp;
+    }
+
+    private static String chosen_key_getter(int user_choice, String user_city) {
+        String apiUrl = location_api_url(user_city);
+        JSONArray jsonArray = generateJsonArrayForApiCall(apiUrl);
+        
         if (user_choice >= 0 && user_choice < jsonArray.length()) {
                 JSONObject chosenObject = jsonArray.getJSONObject(user_choice);
                 String chosenKey = chosenObject.getString("Key");
-
-                String apiUrlFormatTemp = "http://dataservice.accuweather.com/currentconditions/v1/%s?apikey=%s";
-                String apiUrlTemp = String.format(apiUrlFormatTemp, chosenKey, apiKey);
-
-                JSONArray jsonArray2 = generateJsonArrayForApiCall(apiUrlTemp);
-
-                if (jsonArray2 != null) {
-                    for (int i = 0; i < jsonArray2.length(); i++) {
-                        JSONObject jsonObject2 = jsonArray2.getJSONObject(i);
-                        String weatherText = jsonObject2.getString("WeatherText");
-                        JSONObject temperature = jsonObject2.getJSONObject("Temperature");
-                        JSONObject metricObject = temperature.getJSONObject("Metric");
-                        Double temperatureValue = metricObject.getDouble("Value");
-                        String unit = metricObject.getString("Unit");
-                        
-                        System.out.println(user_city + " : " + weatherText + " and is " + temperatureValue + unit);
-                    }   
-                } else {
-                    System.out.print("Error fetching data for temperatures.");
-                }
+                return chosenKey;
             } else {
-                System.out.println("Invalid choice.");
-            }
+                System.out.print("Invalid choice!");
+                return null;
+        }
+    }
+    
+    private static void temp_api_parser(int user_choice, String user_city) {
+        String chosen_key_string = chosen_key_getter(user_choice, user_city);
+        int chosen_key_int = Integer.parseInt(chosen_key_string);
+        String apiUrlTemp = key_api_url(chosen_key_int);
+        JSONArray jsonArray2 = generateJsonArrayForApiCall(apiUrlTemp);
+
+        if (jsonArray2 != null) {
+            for (int i = 0; i < jsonArray2.length(); i++) {
+                JSONObject jsonObject2 = jsonArray2.getJSONObject(i);
+                String weatherText = jsonObject2.getString("WeatherText");
+                JSONObject temperature = jsonObject2.getJSONObject("Temperature");
+                JSONObject metricObject = temperature.getJSONObject("Metric");
+                Double temperatureValue = metricObject.getDouble("Value");
+                String unit = metricObject.getString("Unit");
+                        
+                 System.out.println(user_city + " : " + weatherText + " and is " + temperatureValue + unit);
+            }   
+        } else {
+            System.out.print("Error fetching data for temperatures.");
+        }
     }
 }
