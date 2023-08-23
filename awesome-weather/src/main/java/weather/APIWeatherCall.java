@@ -10,9 +10,9 @@ import org.json.JSONObject;
 
 import java.util.Scanner;
 
-public class APICaller {
+public class APIWeatherCall {
     public static void main(String[] args) {
-        APICaller apiCaller = new APICaller();
+        APIWeatherCall apiCaller = new APIWeatherCall();
         apiCaller.run();
     }
     
