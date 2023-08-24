@@ -16,21 +16,21 @@ public class APIWeatherCall {
         apiCaller.run();
     }
     
-    private static String locationApiUrl(String user_city) {
+    private String locationApiUrl(String user_city) {
         String apiKey = System.getenv("MY_API_KEY");
         String apiUrlFormat = "http://dataservice.accuweather.com/locations/v1/cities/search?apikey=%s&q=%s";
         String locationApiUrl = String.format(apiUrlFormat, apiKey, user_city);
         return locationApiUrl;
     }
     
-    private static String tempApiUrl(int chosen_key_int, String user_city) {
+    private String tempApiUrl(int chosen_key_int, String user_city) {
         String apiKey = System.getenv("MY_API_KEY");
         String apiUrlFormatTemp = "http://dataservice.accuweather.com/currentconditions/v1/%s?apikey=%s";
         String apiUrlTemp = String.format(apiUrlFormatTemp, chosen_key_int, apiKey);
         return apiUrlTemp;
     }
 
-    private static JSONArray generateJsonArrayForApiCall(String apiUrl) {
+    private JSONArray generateJsonArrayForApiCall(String apiUrl) {
         HttpClient httpClient = HttpClients.createDefault();
         try {
             HttpGet request = new HttpGet(apiUrl);
@@ -43,7 +43,7 @@ public class APIWeatherCall {
         }
     }
 
-    private static void fetchLocationData(String user_city) {
+    private void fetchLocationData(String user_city) {
         String apiUrl = locationApiUrl(user_city);
         JSONArray jsonArray = generateJsonArrayForApiCall(apiUrl);
         
@@ -63,7 +63,7 @@ public class APIWeatherCall {
         }        
     }
 
-    private static String fetchChosenKey(int user_choice, String user_city) {
+    private String fetchChosenKey(int user_choice, String user_city) {
         String apiUrl = locationApiUrl(user_city);
         JSONArray jsonArray = generateJsonArrayForApiCall(apiUrl);
         
@@ -77,7 +77,7 @@ public class APIWeatherCall {
         }
     }
 
-    private static void fetchTemperatureData(int user_choice, String user_city) {
+    private void fetchTemperatureData(int user_choice, String user_city) {
         String chosen_key_string = fetchChosenKey(user_choice, user_city);
         int chosen_key_int = Integer.parseInt(chosen_key_string);
         String apiUrlTemp = tempApiUrl(chosen_key_int, user_city);
